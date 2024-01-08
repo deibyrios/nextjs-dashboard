@@ -84,17 +84,35 @@ export async function createInvoice(prevState: State, formData: FormData) {
 /*********     UPDATE INVOICE     ******************/
 
 // Use Zod to update the expected types
-const UpdateInvoice = FormSchema.omit({ id: true, date: true });
+const validateUpdateInvoice = FormSchema.omit({ id: true, date: true });
 
-export async function updateInvoice(id: string, formData: FormData) {
-  const { customerId, amount, status } = UpdateInvoice.parse({
+export async function updateInvoice(
+  id: string,
+  prevState: State,
+  formData: FormData,
+) {
+  // safeParse() return an object containing either a success or error field. This will help handle validation without manual try/catch logic:
+  const validatedFields = validateUpdateInvoice.safeParse({
     customerId: formData.get('customerId'),
     amount: formData.get('amount'),
     status: formData.get('status'),
   });
 
-  const amountInCents = amount * 100;
+  // If form validation fails, return errors early. Otherwise, continue.
+  if (!validatedFields.success) {
+    console.log(validatedFields);
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing Fields. Failed to Update Invoice.',
+    };
+  }
 
+  // Rest of the code will only execute if validatedFields.success (return if != -see block above-):
+  // Prepare data for insertion into the database:
+  const { customerId, amount, status } = validatedFields.data;
+  const amountInCents = amount * 100; // invoice amounts are stored in cents in the DB
+
+  // Update data in the database:
   try {
     await sql`
         UPDATE invoices
@@ -114,12 +132,40 @@ export async function updateInvoice(id: string, formData: FormData) {
 /*********     DELETE INVOICE     ******************/
 
 export async function deleteInvoice(id: string) {
-  throw new Error('Failed to Delete Invoice');
   try {
     await sql`DELETE FROM invoices WHERE id = ${id}`;
     revalidatePath('/dashboard/invoices');
     return { message: 'Deleted Invoice.' };
   } catch (error) {
     return { message: 'Database Error: Failed to Delete Invoice.' };
+  }
+}
+
+/* */
+/* */
+/*********     AUTHENTICATE USER     ******************/
+
+import { signIn } from '@/auth';
+import { AuthError } from 'next-auth';
+
+// ...
+
+export async function authenticate(
+  prevState: string | undefined,
+  formData: FormData,
+) {
+  try {
+    console.log('trying to authenticate user...');
+    await signIn('credentials', formData);
+  } catch (error) {
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case 'CredentialsSignin':
+          return 'Invalid credentials.';
+        default:
+          return 'Something went wrong.';
+      }
+    }
+    throw error;
   }
 }
