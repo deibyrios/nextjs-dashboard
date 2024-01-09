@@ -169,3 +169,23 @@ export async function authenticate(
     throw error;
   }
 }
+
+/*********     GOOGLE AUTHENTICATION     ******************/
+
+export async function authGoogle() {
+  try {
+    console.log('trying to authenticate with Google in actions...');
+    await signIn('google');
+  } catch (error) {
+    console.log(error);
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case 'CredentialsSignin':
+          return 'Invalid credentials.';
+        default:
+          return 'Something went wrong.';
+      }
+    }
+    throw error;
+  }
+}

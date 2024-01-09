@@ -6,6 +6,8 @@ import { sql } from '@vercel/postgres';
 import type { User } from '@/app/lib/definitions';
 import bcrypt from 'bcrypt';
 
+import GoogleProvider from 'next-auth/providers/google';
+
 async function getUser(email: string): Promise<User | undefined> {
   try {
     const user = await sql<User>`SELECT * FROM users WHERE email=${email}`;
@@ -16,7 +18,12 @@ async function getUser(email: string): Promise<User | undefined> {
   }
 }
 
-export const { auth, signIn, signOut } = NextAuth({
+export const {
+  handlers: { GET, POST },
+  auth,
+  signIn,
+  signOut,
+} = NextAuth({
   ...authConfig,
   providers: [
     Credentials({
@@ -40,6 +47,10 @@ export const { auth, signIn, signOut } = NextAuth({
         console.log('Invalid credentials');
         return null;
       },
+    }),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     }),
   ],
 });
