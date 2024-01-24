@@ -1,3 +1,5 @@
+'use server'; // mark all the functions here as server functions, even if imported into Client components.
+
 import { sql } from '@vercel/postgres';
 import {
   CustomerField,
@@ -21,7 +23,7 @@ export async function fetchRevenue() {
     // Don't do this in production :)
 
     console.log('Fetching revenue data...');
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    // await new Promise((resolve) => setTimeout(resolve, 3000));
 
     const data = await sql<Revenue>`SELECT * FROM revenue`;
 

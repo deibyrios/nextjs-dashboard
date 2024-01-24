@@ -7,6 +7,9 @@ import { fetchLatestInvoices, fetchCardData } from '@/app/lib/data'; // Now we'l
 import { Suspense } from 'react'; // Alloes to replace component while it is loading
 import { RevenueChartSkeleton } from '@/app/ui/skeletons'; // This will replace 'RevenueChart' component while it is loading
 
+import { auth } from '@/auth';
+import Image from 'next/image';
+
 export default async function Page() {
   // const revenue = await fetchRevenue(); // In this option we were fetching Revenue data here
   const latestInvoices = await fetchLatestInvoices();
@@ -16,11 +19,24 @@ export default async function Page() {
     totalPaidInvoices,
     totalPendingInvoices,
   } = await fetchCardData();
+
+  const session = await auth();
+
   return (
     <main>
       <h1 className={`${lusitana.className} mb-4 text-xl md:text-2xl`}>
         Dashboard
       </h1>
+      <div className="flex">
+        <p>{`welcome ${session?.user?.name}`}</p>
+        <Image
+          src={session?.user?.image || '/google.png'}
+          alt="User Image"
+          width={60}
+          height={60}
+        ></Image>
+      </div>
+      <p>{session?.user?.email}</p>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <Card title="Collected" value={totalPaidInvoices} type="collected" />
         <Card title="Pending" value={totalPendingInvoices} type="pending" />

@@ -1,5 +1,8 @@
 'use server'; // mark all the functions here as server functions, even if imported into Client components.
 
+// put all sensitive actions and functions here, to ensure they are all on the server and never on the client
+// b/c you may inadvertenly make a whole route a client component when you write 'use client'!!!!!!
+
 import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
@@ -37,12 +40,16 @@ export type State = {
 
 export async function createInvoice(prevState: State, formData: FormData) {
   // Second, we validate form fields using Zod:
-  // safeParse() return an object containing either a success or error field. This will help handle validation without manual try/catch logic:
+  // safeParse() return an object containing either a success or error field.
+  // This will help handle validation without manual try/catch logic:
   const validatedFields = validateInvoice.safeParse({
     customerId: formData.get('customerId'),
     amount: formData.get('amount'),
     status: formData.get('status'),
   });
+  // Tip: If you're working with forms that have many fields, you may want to consider using
+  // the entries() method with JavaScript's Object.fromEntries(). For example:
+  // const rawFormData = Object.fromEntries(formData.entries())
 
   // If form validation fails, return errors early. Otherwise, continue.
   if (!validatedFields.success) {
@@ -91,7 +98,8 @@ export async function updateInvoice(
   prevState: State,
   formData: FormData,
 ) {
-  // safeParse() return an object containing either a success or error field. This will help handle validation without manual try/catch logic:
+  // safeParse() return an object containing either a success or error field.
+  // This will help handle validation without manual try/catch logic:
   const validatedFields = validateUpdateInvoice.safeParse({
     customerId: formData.get('customerId'),
     amount: formData.get('amount'),

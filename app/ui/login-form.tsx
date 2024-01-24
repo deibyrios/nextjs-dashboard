@@ -16,11 +16,14 @@ export default function LoginForm() {
 
   return (
     <>
-      <form action={dispatch} className="space-y-3">
-        <div className="flex-1 rounded-lg bg-gray-50 px-6 pb-4 pt-8">
-          <h1 className={`${lusitana.className} mb-3 text-2xl`}>
-            Please log in to continue.
-          </h1>
+      <div className="flex-1 rounded-lg bg-gray-50 px-6 pb-4 pt-8">
+        <h1 className={`${lusitana.className} mb-3 text-2xl`}>
+          Please log in to continue.
+        </h1>
+        <div className="flex">
+          <GoogleButton />
+        </div>
+        <form action={dispatch} className="space-y-3">
           <div className="w-full">
             <div>
               <label
@@ -75,9 +78,8 @@ export default function LoginForm() {
               </>
             )}
           </div>
-        </div>
-      </form>
-      <GoogleButton />
+        </form>
+      </div>
     </>
   );
 }
@@ -93,6 +95,7 @@ function LoginButton() {
 }
 
 import { authGoogle } from '@/app/lib/actions';
+import Image from 'next/image';
 
 function GoogleButton() {
   const handleClick = () => {
@@ -100,9 +103,19 @@ function GoogleButton() {
     authGoogle();
   };
   return (
-    <Button onClick={handleClick} className="mt-4 w-full">
-      Log in with Google
-      <ArrowRightIcon className="ml-auto h-5 w-5 text-gray-50" />
+    <Button
+      onClick={handleClick}
+      className="focus:shadow-outline mt-4 flex h-14 w-full justify-center rounded-lg border-2 border-black
+      px-6 text-xl font-semibold text-black transition-colors duration-300 hover:bg-slate-200"
+    >
+      <Image
+        src="/google.png"
+        alt="Google logo"
+        width={20}
+        height={20}
+        className="mr-5"
+      ></Image>
+      Continue with Google
     </Button>
   );
 }
